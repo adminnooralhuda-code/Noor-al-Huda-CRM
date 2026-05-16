@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
-// നിങ്ങളുടെ യഥാർത്ഥ MongoDB അറ്റ്‌ലസ് കണക്ഷൻ സ്ട്രിംഗ് ഇവിടെ നേരിട്ട് കൊടുക്കുക
-const MONGODB_URI = "mongodb+srv://adminnooralhuda:നിങ്ങളുടെ_പാസ്‌വേഡ്@cluster.xxxx.mongodb.net/NoorAlHudaCRM?retryWrites=true&w=majority";
+// നിങ്ങളുടെ ശരിക്കുള്ള പാസ്‌വേഡ് ആയ w2Ja-bB%xqvpiAZ ഇതിലേക്ക് കൃത്യമായി ചേർത്തിട്ടുണ്ട്
+const MONGODB_URI = "mongodb+srv://adminnooralhuda_db_user:w2Ja-bB%25xqvpiAZ@cluster0.nx3eytq.mongodb.net/NoorAlHudaCRM?retryWrites=true&w=majority&appName=Cluster0";
 
 if (!MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI inside lib/mongodb.ts");

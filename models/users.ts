@@ -1,33 +1,16 @@
 import mongoose from 'mongoose';
 
-// യൂസർ സ്കീമ ഡിഫൈൻ ചെയ്യുന്നു
-const UserSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
-    role: {
-      type: String,
-      required: true,
-      default: 'staff',
-    },
+const UserSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { 
+    type: String, 
+    enum: ['Super Admin', 'Manager', 'Staff', 'Customer'], 
+    default: 'Staff' 
   },
-  {
-    timestamps: true,
-  }
-);
+  // Customer-ക്കോ Staff-നോ ഒന്നിലധികം കമ്പനികളുടെ ആക്സസ് നൽകാൻ
+  assignedCompanies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Company' }]
+}, { timestamps: true });
 
-// പ്രൊഡക്ഷൻ സെർവറിൽ എറർ വരാതിരിക്കാനുള്ള ഫിക്സ്
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
-
-export default User;
+export default mongoose.models.User || mongoose.model('User', UserSchema);

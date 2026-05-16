@@ -1,25 +1,29 @@
-import mongoose, { Schema, model, models } from 'mongoose';
+import mongoose from 'mongoose';
 
-const EmployeeSchema = new Schema({
-  employeeId: { type: String, required: true, unique: true },
-  companyId: { type: Schema.Types.ObjectId, ref: 'Company', required: false }, // കമ്പനിയുമായി ലിങ്ക് ചെയ്യാൻ
-  name: { type: String, required: true },
+const EmployeeSchema = new mongoose.Schema({
+  employeeId: { type: String, unique: true }, // Auto-generated (EMP-001...)
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' }, // Linked Company
+  name: String,
   designation: String,
   nationality: String,
   passportNo: String,
-  passportExpiry: String,
+  passportExpiryDate: String,
+  
   emiratesIdNo: String,
-  emiratesIdIssue: String,
-  emiratesIdExpiry: String,
+  emiratesIdIssueDate: String,
+  emiratesIdExpiryDate: String,
+  
   labourCardNo: String,
-  labourCardExpiry: String,
-  visaExpiry: String, // വിസ എക്സ്പൈറി ഡേറ്റ് ട്രാക്കർ
-  iloeExpiry: String,
-  insuranceCompany: String,
-  insuranceExpiry: String,
-  dob: String,
-  mobile: String,
+  labourCardExpiryDate: String,
+  
+  iloeExpiryDate: String,
+  
+  insurance: String, // Manual Entry
+  insuranceExpiryDate: String,
+  
+  dateOfBirth: String,
+  mobileNo: String,
   email: String
 }, { timestamps: true });
 
-export default models.Employee || model('Employee', EmployeeSchema);
+export default mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema);

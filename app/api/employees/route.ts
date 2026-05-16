@@ -1,40 +1,26 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Employee from '@/models/employee';
+import connectToDatabase from '../../../lib/mongodb';
+import Employee from '../../../models/employee';
 
 export async function GET() {
   try {
-    await connectDB();
+    await connectToDatabase();
     const employees = await Employee.find({}).sort({ createdAt: -1 });
-    return NextResponse.json(employees, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ message: "Failed to fetch workforce data" }, { status: 500 });
+    return NextResponse.json(employees);
+  } catch (error: any) {
+    console.error("GET Employees Error:", error);
+    return NextResponse.json({ error: 'Failed to fetch employees' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
-    await connectDB();
-    const body = await request.json();
-    
-    const newEmployee = await Employee.create(body);
+    await connectToDatabase();
+    const data = await request.json();
+    const newEmployee = await Employee.create(data);
     return NextResponse.json(newEmployee, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ message: "Failed to register employee" }, { status: 500 });
-  }
-}
-
-export async function DELETE(request: Request) {
-  try {
-    await connectDB();
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-
-    if (!id) return NextResponse.json({ message: "Employee ID required" }, { status: 400 });
-
-    await Employee.findByIdAndDelete(id);
-    return NextResponse.json({ success: true, message: "Employee clearance updated" }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ message: "Employee termination logging failed" }, { status: 500 });
+    console.error("POST Employee Error:", error);
+    return NextResponse.json({ error: error.message || 'Failed to create employee' }, { status: 500 });
   }
 }

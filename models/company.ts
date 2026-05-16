@@ -1,59 +1,80 @@
-import mongoose, { Schema, model, models } from 'mongoose';
+import mongoose from 'mongoose';
 
-const OwnerSchema = new Schema({
-  isCompany: { type: Boolean, default: false },
-  role: String,
+const OwnerSchema = new mongoose.Schema({
+  isCompany: { type: Boolean, default: false }, // Checkbox for Individual or Company
+  // If Individual
+  rolePosition: String,
   nationality: String,
   name: String,
   emiratesId: String,
-  eIdExpiry: String,
-  insuranceNo: String,
+  emiratesIdExpiry: String,
+  insuranceNumber: String, // For non-locals
   insuranceExpiry: String,
-  mobile: String,
+  mobileNo: String,
+  // If Company
   companyNo: String,
   companyName: String,
-  issuePlace: String,
-  contactPerson: String,
+  companyIssuePlace: String,
+  companyContactPerson: String,
   contactNumber: String
 });
 
-const ManagerSchema = new Schema({
-  role: String,
-  nationality: String,
-  name: String,
-  mobile: String
-});
-
-const CompanySchema = new Schema({
-  companyCode: { type: String, required: true, unique: true },
-  nameEn: { type: String, required: true },
+const CompanySchema = new mongoose.Schema({
+  companyCode: { type: String, unique: true }, // Auto-generated (C-001...)
+  nameEn: String,
   nameAr: String,
-  dedNumber: String,
+  dedNumber: String, // CN/IN-NUMBER
   establishmentDate: String,
   issuanceDate: String,
-  expiryDate: String, // Automatic Expiry Tracking-ന് ഉപയോഗിക്കുന്നത്
-  legalForm: { type: String, default: 'Establishment' },
+  expiryDate: String,
+  legalForm: { 
+    type: String, 
+    enum: ['Limited Liability Company- sole proprietorship Company', 'limited Liability Company', 'Establishment']
+  },
+  
+  // Ownership details based on Legal Form
   owners: [OwnerSchema],
-  managers: [ManagerSchema],
+  
+  // Manager Option inside Company
+  managerDetails: {
+    rolePosition: String,
+    nationality: String,
+    name: String,
+    mobileNo: String
+  },
+
+  // License Activities (Dynamic arrays)
   activities: [String],
-  hasLease: { type: String, default: 'No' },
-  leaseNumber: String,
-  leaseExpiry: String,
-  leasePlace: String,
+
+  // Address & Lease Contract
+  hasLeaseContract: { type: Boolean, default: false },
+  leaseContractNumber: String,
+  leaseExpiryDate: String,
+  place: String,
   companyEmail: String,
   companyMobile: String,
-  icpCardNumber: String,
-  eChannelUser: String,
-  eChannelPass: String,
-  icpIssueDate: String,
-  icpExpiryDate: String,
+
+  // ICP Details
+  icpEstablishmentCardNumber: String,
+  eChannelUsername: String,
+  eChannelPassword: String,
+  establishmentCardIssueDate: String,
+  establishmentCardExpiryDate: String,
+
+  // Mohre Details
   mohreNumber: String,
-  mohreLastUpdate: String,
-  damanPolicy: String,
-  damanExpiry: String,
-  damanTotalMembers: String,
-  contactPersonDetails: String
+  mohreUpdatingLastDate: String,
+
+  // Daman Details
+  damanPolicyNumber: String,
+  damanExpiryDate: String,
+  totalMembersInDaman: String,
+
+  // General Contact Person
+  contactPersonDetails: String,
+  
+  // Assigned staff for permissions
+  assignedStaff: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, { timestamps: true });
 
-// Next.js സർവർ റീലോഡ് ചെയ്യുമ്പോൾ മോഡൽ വീണ്ടും ക്രിയേറ്റ് ചെയ്യാതിരിക്കാനുള്ള മുൻകരുതൽ
-export default models.Company || model('Company', CompanySchema);
+export default mongoose.models.Company || mongoose.model('Company', CompanySchema);
