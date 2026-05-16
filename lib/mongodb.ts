@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI;
+// നിങ്ങളുടെ യഥാർത്ഥ MongoDB അറ്റ്‌ലസ് കണക്ഷൻ സ്ട്രിംഗ് ഇവിടെ നേരിട്ട് കൊടുക്കുക
+const MONGODB_URI = "mongodb+srv://adminnooralhuda:നിങ്ങളുടെ_പാസ്‌വേഡ്@cluster.xxxx.mongodb.net/NoorAlHudaCRM?retryWrites=true&w=majority";
 
 if (!MONGODB_URI) {
-  console.log("Warning: MONGODB_URI is not defined in environment variables");
+  throw new Error("Please define the MONGODB_URI inside lib/mongodb.ts");
 }
 
 const connectDB = async () => {
@@ -12,10 +13,10 @@ const connectDB = async () => {
   }
 
   try {
-    await mongoose.connect(MONGODB_URI as string);
-    console.log("MongoDB connected successfully");
+    await mongoose.connect(MONGODB_URI);
+    console.log("MongoDB Database Connected Successfully to NoorAlHudaCRM");
   } catch (error) {
-    console.error("MongoDB connection error:", error);
+    console.error("MongoDB Connection Error:", error);
   }
 };
 
