@@ -1,53 +1,31 @@
-// app/api/customer-data/route.ts
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
+import connectDB from '@/lib/mongodb';
+import User from '@/models/users'; // നിങ്ങളുടെ കൃത്യമായ മോഡൽ പാത്ത്
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email'); 
+    // 1. ഡാറ്റാബേസ് കണക്ഷൻ ഉറപ്പാക്കുന്നു
+    await connectDB();
 
-    if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 });
+    const body = await request.json();
+    const { email } = body;
 
-    const client = await clientPromise;
-    const db = client.db('NoorAlHudaCRM');
+    if (!email) {
+      return NextResponse.json({ message: "Email is required" }, { status: 400 });
+    }
 
-    // 1. Customer അക്കൗണ്ട് കണ്ടെത്തുന്നു
-    const customer = await db.collection('users').findOne({ email, role: 'customer' });
-    if (!customer) return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
+    // 2. മംഗൂസ് മോഡൽ വഴി കസ്റ്റമറെ കണ്ടെത്തുന്നു
+    const customer = await User.findOne({ email, role: 'customer' });
 
-    // കസ്റ്റമർക്ക് അനുവദിച്ച കമ്പനി ഐഡികൾ എടുക്കുന്നു (ഇല്ലെങ്കിൽ പഴയ സിസ്റ്റം ബായ്ക്കപ്പ് ആയി ലൈസൻസ് നോക്കും)
-    const allowedIds = customer.accessibleCompanies || [];
-    
-    const objectIds = allowedIds.map((id: string) => {
-      try { return new ObjectId(id); } catch (e) { return null; }
-    }).filter(Boolean);
+    if (!customer) {
+      return NextResponse.json({ message: "Customer data clearance missing or unauthorized" }, { status: 404 });
+    }
 
-    // 2. ആ കസ്റ്റമറുടെ എല്ലാ കമ്പനികളും ഡാറ്റാബേസിൽ നിന്ന് എടുക്കുന്നു
-    const companies = await db.collection('companies').find({
-      $or: [
-        { _id: { $in: objectIds } },
-        { _id: { $in: allowedIds } },
-        { tradeLicense: customer.companyLicense } // പഴയ കസ്റ്റമർമാർക്ക് വേണ്ടിയുള്ള സേഫ്റ്റി ലോജിക്
-      ]
-    }).toArray();
+    // കസ്റ്റമർ ഡാറ്റ വിജയകരമായി റിട്ടേൺ ചെയ്യുന്നു
+    return NextResponse.json(customer, { status: 200 });
 
-    const companyIdsStrings = companies.map(c => c._id.toString());
-
-    // 3. ആ കമ്പനികളിലെ മുഴുവൻ ജീവനക്കാരുടെയും വിവരങ്ങൾ എടുക്കുന്നു
-    const employees = await db.collection('employees').find({
-      companyId: { $in: companyIdsStrings }
-    }).toArray();
-
-    return NextResponse.json({
-      customerName: customer.name,
-      companies, // ഒന്നിലധികം കമ്പനികൾ പോകും
-      employees
-    });
-
-  } catch (error) {
-    console.error('Customer API Error:', error);
-    return NextResponse.json({ error: 'Database Error' }, { status: 500 });
+  } catch (error: any) {
+    console.error("Customer Data API Error:", error);
+    return NextResponse.json({ message: "Internal server error during data retrieval" }, { status: 500 });
   }
 }
