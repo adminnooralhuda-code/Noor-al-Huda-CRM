@@ -1,12 +1,33 @@
-import mongoose, { Schema, model, models } from 'mongoose';
+import mongoose from 'mongoose';
 
-const userSchema = new Schema({
-  name: { type: String, required: true },
-  username: { type: String, required: true, unique: true, lowercase: true },
-  password: { type: String, required: true },
-  email: String,
-  role: { type: String, enum: ['admin', 'manager', 'staff'], default: 'manager' },
-  status: { type: String, enum: ['Active', 'Suspended'], default: 'Active' }
-}, { timestamps: true });
+// യൂസർ സ്കീമ ഡിഫൈൻ ചെയ്യുന്നു
+const UserSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      required: true,
+      default: 'staff',
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-export default models.user || model('user', userSchema);
+// പ്രൊഡക്ഷൻ സെർവറിൽ എറർ വരാതിരിക്കാനുള്ള ഫിക്സ്
+const User = mongoose.models.User || mongoose.model('User', UserSchema);
+
+export default User;
