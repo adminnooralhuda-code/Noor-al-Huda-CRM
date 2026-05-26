@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../api'; // api.js instance ഉപയോഗിക്കുന്നു
+import api from '../api'; 
 import Layout from './Layout';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,7 @@ const AddCompany = ({ onLogout }) => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         companyNameEn: '', companyNameAr: '', companyNumber: '',
-        estDate: '', issueDate: '', expiryDate: '',
+        estDate: '', issueDate: '', 
         licenseExpiry: '', establishmentCardExpiry: '', eChannelExpiry: '', companyInsuranceExpiry: '',
         legalForm: 'L.L.C-S.P.C',
         ownerName: '', ownerRole: '', managerName: '', managerMobile: '',
@@ -23,16 +23,26 @@ const AddCompany = ({ onLogout }) => {
     };
 
     const handleSubmit = async () => {
+        // കാലിയായ ഡേറ്റ് ഫീൽഡുകളെ null ആക്കുന്നു - ഇത് നിർബന്ധമാണ്
+        const dateFields = ['estDate', 'issueDate', 'licenseExpiry', 'establishmentCardExpiry', 'eChannelExpiry', 'companyInsuranceExpiry', 'leaseExpiry'];
+        
+        const cleanData = { ...formData };
+        dateFields.forEach(field => {
+            if (cleanData[field] === '') {
+                cleanData[field] = null;
+            }
+        });
+
         try {
-            await api.post('/companies/add', formData);
+            await api.post('/companies/add', cleanData);
             alert("കമ്പനി ഡീറ്റെയിൽസ് വിജയകരമായി സേവ് ചെയ്തു!");
-            navigate('/admin/companies'); // സേവ് ചെയ്ത ശേഷം ലിസ്റ്റ് പേജിലേക്ക്
+            navigate('/admin/companies');
         } catch (err) {
-            console.error("Error details:", err);
+            console.error("Error details:", err.response?.data || err);
             if (err.response?.status === 401) {
                 onLogout();
             } else {
-                alert("ഡാറ്റ സേവ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു.");
+                alert("ഡാറ്റ സേവ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു: " + (err.response?.data?.message || "Server Error"));
             }
         }
     };
@@ -105,7 +115,7 @@ const AddCompany = ({ onLogout }) => {
                 {/* Step 4: Documents */}
                 {step === 4 && (
                     <div className="form-step">
-                        <label>Establishment Card No:</label>
+                        <label>Establishment Card No (ICP Card):</label>
                         <input name="icpCard" value={formData.icpCard} onChange={handleInputChange} />
                         <label>Mohre Number:</label>
                         <input name="mohreNo" value={formData.mohreNo} onChange={handleInputChange} />

@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png'; // ലോഗോ പാത്ത് ശരിയാണെന്ന് ഉറപ്പാക്കുക
-import './Layout.css'; 
+import logo from '../assets/logo.png';
 
 function Layout({ children, onLogout }) {
   const [dateTime, setDateTime] = useState('');
   const navigate = useNavigate();
-  
-  const userRole = localStorage.getItem('role'); 
+  const userRole = localStorage.getItem('role');
 
   useEffect(() => {
     const updateDateTime = () => {
@@ -25,44 +23,101 @@ function Layout({ children, onLogout }) {
     navigate('/login');
   };
 
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <div style={{ width: '250px', background: '#2c3e50', color: '#fff', padding: '20px', display: 'flex', flexDirection: 'column' }}>
-        <div className="logo-container">
-            <img src={logo} alt="Company Logo" style={{ width: '100%' }} />
-        </div>
-        
-        <h3 style={{ textAlign: 'center', marginTop: '10px' }}>
-            {userRole === 'admin' ? 'Admin Portal' : 'Customer Portal'}
-        </h3>
+  const strokeColor = '#5d0915'; // Darker stroke color
 
-        <ul style={{ listStyle: 'none', padding: 0, marginTop: '30px', flexGrow: 1 }}>
-          <li style={{ marginBottom: '15px' }}>
-            <Link to={userRole === 'admin' ? '/admin-dashboard' : '/customer-dashboard'} style={{ color: '#fff', textDecoration: 'none' }}>
-                {userRole === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
+  const styles = {
+    container: { display: 'flex', minHeight: '100vh', background: '#f4f7f6' },
+    sidebar: { 
+      width: '260px', 
+      background: 'linear-gradient(180deg, #880d1e 0%, #dd2d4a 100%)', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100vh', 
+      position: 'sticky', 
+      top: 0,
+      color: '#fff' 
+    },
+    logoContainer: { padding: '30px 20px', textAlign: 'center' },
+    logoCircle: { 
+      width: '90px', 
+      height: '90px', 
+      borderRadius: '50%', 
+      border: `4px solid ${strokeColor}`, 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      margin: '0 auto',
+      backgroundColor: '#ffffff' // ലോഗോയ്ക്ക് ചുറ്റുമുള്ള സർക്കിൾ വൈറ്റ്
+    },
+    title: { textAlign: 'center', fontSize: '1.2rem', fontWeight: '800', marginTop: '15px', color: '#fff' },
+    menuList: { listStyle: 'none', padding: '10px 15px', flexGrow: 1, margin: 0 },
+    menuItem: { 
+      borderBottom: `1px solid ${strokeColor}`, 
+      padding: '5px 0' 
+    },
+    link: { 
+      display: 'block', 
+      padding: '14px 10px', 
+      color: '#fff', 
+      textDecoration: 'none', 
+      fontWeight: '500' 
+    },
+    logout: { 
+      cursor: 'pointer', 
+      color: '#fff', 
+      fontWeight: '700', 
+      padding: '15px', 
+      margin: '20px',
+      textAlign: 'center',
+      backgroundColor: strokeColor, 
+      borderRadius: '8px',
+      transition: '0.3s'
+    },
+    mainContent: { flex: 1, padding: '30px' },
+    dateDisplay: { textAlign: 'right', marginBottom: '20px', color: '#555', fontWeight: '600' }
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.sidebar}>
+        <div style={styles.logoContainer}>
+            <div style={styles.logoCircle}>
+                <img src={logo} alt="Logo" style={{ width: '60px', borderRadius: '50%' }} />
+            </div>
+        </div>
+        <h3 style={styles.title}>{userRole === 'admin' ? 'Admin Portal' : 'Customer Portal'}</h3>
+
+        <ul style={styles.menuList}>
+          <li style={styles.menuItem}>
+            <Link to={userRole === 'admin' ? '/admin-dashboard' : '/customer-dashboard'} style={styles.link}>
+              Dashboard
             </Link>
           </li>
-
           {userRole === 'admin' && (
             <>
-              <li style={{ marginBottom: '15px' }}><Link to="/admin/companies" style={{ color: '#fff', textDecoration: 'none' }}>Companies</Link></li>
-              <li style={{ marginBottom: '15px' }}><Link to="/admin/employees" style={{ color: '#fff', textDecoration: 'none' }}>Employees</Link></li>
-              <li style={{ marginBottom: '15px' }}><Link to="/admin/users" style={{ color: '#fff', textDecoration: 'none' }}>User Management</Link></li>
+              <li style={styles.menuItem}><Link to="/admin/companies" style={styles.link}>Companies</Link></li>
+              <li style={styles.menuItem}><Link to="/admin/employees" style={styles.link}>Employees</Link></li>
+              <li style={styles.menuItem}><Link to="/admin/users" style={styles.link}>User Management</Link></li>
             </>
           )}
         </ul>
 
-        <div style={{ cursor: 'pointer', color: '#ff7675', fontWeight: 'bold', marginTop: 'auto' }} onClick={handleLogout}>
+        <div 
+          style={styles.logout} 
+          onClick={handleLogout}
+          onMouseOver={(e) => { e.target.style.backgroundColor = '#ffffff'; e.target.style.color = strokeColor; }}
+          onMouseOut={(e) => { e.target.style.backgroundColor = strokeColor; e.target.style.color = '#fff'; }}
+        >
           Logout
         </div>
       </div>
 
-      <div style={{ flex: 1, padding: '20px', background: '#ecf0f1' }}>
-        <div style={{ textAlign: 'right', marginBottom: '10px', color: '#555', fontWeight: '600' }}>{dateTime}</div>
+      <div style={styles.mainContent}>
+        <div style={styles.dateDisplay}>{dateTime}</div>
         {children}
       </div>
     </div>
   );
 }
 
-export default Layout; // ഇത് നിർബന്ധമാണ്
+export default Layout;
