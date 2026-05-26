@@ -1,25 +1,23 @@
 const mongoose = require('mongoose');
 
 const companySchema = new mongoose.Schema({
-    // models/Company.js
-companyCode: { 
-    type: String, 
-    unique: true, 
-    sparse: true // ഈ sparse: true ചേർത്താൽ null വാല്യൂകളെ അത് ഡ്യൂപ്ലിക്കേറ്റ് ആയി കാണില്ല
-},
+    companyCode: { 
+        type: String, 
+        unique: true,
+        default: "C-000"
+    },
     companyNameEn: String,
     companyNameAr: String,
     companyNumber: String,
     estDate: Date,
     issueDate: Date,
     
-    // --- എക്സ്പയറി ട്രാക്കിംഗിനായുള്ള പുതിയ ഫീൽഡുകൾ ---
-    licenseExpiry: Date,            // Company License Expiry
-    establishmentCardExpiry: Date,  // Establishment Card Expiry
-    eChannelExpiry: Date,           // Echannel Expiry
-    companyInsuranceExpiry: Date,   // Company Insurance Expiry
-    // --------------------------------------------------
-
+    // --- എക്സ്പയറി ട്രാക്കിംഗിനായുള്ള ഫീൽഡുകൾ ---
+    licenseExpiry: Date,
+    establishmentCardExpiry: Date,
+    eChannelExpiry: Date,
+    companyInsuranceExpiry: Date,
+    
     legalForm: String,
     ownerName: String,
     ownerRole: String,
@@ -34,6 +32,6 @@ companyCode: {
     damanPolicy: String,
     contactName: String,
     contactMobile: String
-});
+}, { timestamps: true }); // ഒരൊറ്റ തവണ മാത്രം ഇത് മതി
 
 module.exports = mongoose.model('Company', companySchema);

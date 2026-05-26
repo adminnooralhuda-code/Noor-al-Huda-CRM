@@ -1,11 +1,24 @@
 const Company = require('../models/Company');
 
-//1. പുതിയ കമ്പനിയെ ആഡ് ചെയ്യാൻ
 exports.addCompany = async (req, res) => {
     try {
-        const newCompany = new Company(req.body);
+        // അവസാനത്തെ കമ്പനി കണ്ടെത്തുന്നു
+        const lastCompany = await Company.findOne().sort({ createdAt: -1 });
+
+        let newCode = "C-001";
+        if (lastCompany && lastCompany.companyCode) {
+            const lastNumber = parseInt(lastCompany.companyCode.split('-')[1]);
+            newCode = `C-${(lastNumber + 1).toString().padStart(3, '0')}`;
+        }
+
+        // കമ്പനി സേവ് ചെയ്യുന്നു
+        const newCompany = new Company({
+            ...req.body,
+            companyCode: newCode // കോഡ് ഇവിടെ നൽകുന്നു
+        });
+
         await newCompany.save();
-        res.status(201).json({ message: "Company added successfully!", data: newCompany });
+        res.status(201).json({ message: "Company added!", data: newCompany });
     } catch (error) {
         res.status(500).json({ message: "Failed to add company", error: error.message });
     }
@@ -62,3 +75,4 @@ exports.updateCompany = async (req, res) => {
         res.status(500).json({ message: "Failed to update company", error: error.message });
     }
 };
+
