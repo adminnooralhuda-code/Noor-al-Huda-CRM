@@ -1,13 +1,11 @@
 const User = require('../models/User');
-const sendEmail = require('../utils/sendEmail');
-const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const registerUser = async (req, res) => {
     try {
-        // 'role' കൂടി ബോഡിയിൽ നിന്ന് എടുക്കുന്നു (ഡിഫോൾട്ട് 'customer')
-        const { email, password, role } = req.body;
+        // 'username' കൂടി ബോഡിയിൽ നിന്ന് എടുക്കുന്നു
+        const { username, email, password, role } = req.body;
 
         let user = await User.findOne({ email });
         if (user) {
@@ -15,42 +13,20 @@ const registerUser = async (req, res) => {
         }   
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const verificationToken = crypto.randomBytes(32).toString('hex');
 
         user = new User({
+            username, // Username സേവ് ചെയ്യുന്നു
             email,
             password: hashedPassword,
-            verificationToken,
-            role: role || 'customer' // റോൾ സെറ്റ് ചെയ്യുന്നു
+            role: role || 'customer'
         });
         await user.save();
 
-        const verificationLink = `http://localhost:3000/api/auth/verify?token=${user.verificationToken}`;        
-        const message = `Please verify your email by clicking the following link: ${verificationLink}`;
-        await sendEmail(email, 'Email Verification', message);
-
-        res.status(201).json({ message: 'User registered successfully. Please check your email to verify your account.' });
+        res.status(201).json({ message: 'User registered successfully.' });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }
 };
- 
-
-/*const verifyEmail = async (req, res) => {
-    try {
-        const { token } = req.query;
-        const user = await User.findOne({ verificationToken: token });
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid token' });
-        }
-        user.isVerified = true;
-        user.verificationToken = undefined;
-        await user.save();
-        res.status(200).json({ message: 'Email verified successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
-    }
-};*/
 
 const loginUser = async (req, res) => {
     try {
@@ -65,8 +41,9 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
+        // Token-ൽ 'username' കൂടി ഉൾപ്പെടുത്തുന്നു (അതുകൊണ്ട് Layout-ൽ ഇത് എളുപ്പത്തിൽ കിട്ടും)
         const token = jwt.sign(
-            { id: user._id, role: user.role }, 
+            { id: user._id, role: user.role, username: user.username }, 
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -74,6 +51,7 @@ const loginUser = async (req, res) => {
         res.status(200).json({ 
             token, 
             role: user.role,
+            username: user.username, // ഫ്രണ്ട്-എൻഡിൽ സ്റ്റോർ ചെയ്യാൻ
             message: 'Login successful' 
         });        
     } catch (error) {
@@ -81,6 +59,7 @@ const loginUser = async (req, res) => {
     }
 };
 
+// getMyProfile, updateProfile, changePassword എന്നിവ അതേപോലെ തുടരാം...
 const getMyProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
@@ -95,14 +74,12 @@ const updateProfile = async (req, res) => {
     try {
         const { mobile, password } = req.body;
         const userId = req.user.id;
-
         const updateData = {};
-        if (mobile) updateData.mobile = mobile; // mobile ഉണ്ടെങ്കിൽ മാത്രം അപ്‌ഡേറ്റ്
+        if (mobile) updateData.mobile = mobile;
         if (password) {
             const salt = await bcrypt.genSalt(10);
             updateData.password = await bcrypt.hash(password, salt);
         }
-
         await User.findByIdAndUpdate(userId, updateData);
         res.status(200).json({ message: 'Profile updated successfully' });
     } catch (error) {
@@ -114,16 +91,12 @@ const changePassword = async (req, res) => {
     try {
         const { oldPassword, newPassword } = req.body;
         const userId = req.user.id;
-
         const user = await User.findById(userId);
-        
         const isMatch = await bcrypt.compare(oldPassword, user.password);
         if (!isMatch) return res.status(400).json({ message: "പഴയ പാസ്‌വേഡ് തെറ്റാണ്!" });
-
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
         await user.save();
-
         res.status(200).json({ message: "പാസ്‌വേഡ് വിജയകരമായി മാറ്റി!" });
     } catch (error) {
         res.status(500).json({ message: "സെർവർ പിശക്!" });
@@ -132,7 +105,6 @@ const changePassword = async (req, res) => {
 
 module.exports = { 
     registerUser, 
-  //  verifyEmail, 
     loginUser, 
     getMyProfile, 
     updateProfile, 

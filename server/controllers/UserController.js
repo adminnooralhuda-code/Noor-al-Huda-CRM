@@ -3,14 +3,15 @@ const Employee = require('../models/Employee');
 const Company = require('../models/Company');
 const bcrypt = require('bcrypt');
 
-// Register a new user (company അസൈൻ ചെയ്യുന്ന ലോജിക് കൂടി ചേർത്തു)
+// 1. Register a new user
 exports.registerUser = async (req, res) => {
     try {
-        const { email, password, role, company } = req.body;
+        // 'username' body-il ninnu extract cheyyuka
+        const { username, email, password, role, company } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        // കസ്റ്റമർ ആണെങ്കിൽ മാത്രം കമ്പനി ഐഡി സേവ് ചെയ്യുന്നു
         const newUser = new User({ 
+            username, // Ithu add cheyyuka
             email, 
             password: hashedPassword, 
             role, 
@@ -24,11 +25,10 @@ exports.registerUser = async (req, res) => {
     }
 };
 
-// Get all users (കമ്പനി വിവരങ്ങൾ കാണിക്കാൻ .populate ചേർത്തു)
-// userController.js
+// 2. Get all users
 exports.getAllUsers = async (req, res) => {
     try {
-        // lean() ചേർക്കുന്നത് MongoDB-യിൽ നിന്നുള്ള ഡാറ്റ വേഗത്തിൽ കിട്ടാനും എറർ കുറയ്ക്കാനും സഹായിക്കും
+        // password ഒഴിവാക്കി username കൂടി ഉൾപ്പെടുത്തി ഡാറ്റ എടുക്കുന്നു
         const users = await User.find().select('-password').populate('company', 'companyNameEn').lean();
         res.json(users);
     } catch (err) {
@@ -37,18 +37,18 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
-// Update a user (Role-ഉം Company-യും അപ്‌ഡേറ്റ് ചെയ്യുന്നു)
+// 3. Update a user
 exports.updateUser = async (req, res) => {
     try {
-        const { role, company } = req.body;
+        const { username, role, company } = req.body; // username കൂടെ എടുത്തു
         
-        // കസ്റ്റമർ ആണെങ്കിൽ മാത്രം കമ്പനി അപ്‌ഡേറ്റ് ചെയ്യുന്നു
         const updateData = {
+            username, // അപ്‌ഡേറ്റ് ലിസ്റ്റിൽ ചേർത്തു
             role,
             company: role === 'customer' ? company : null
         };
 
-        const updated = await User.findByIdAndUpdate(req.params.id, updateData, { new: true});
+        const updated = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
         if (!updated) return res.status(404).json({ message: "User not found" });
 
         res.json({ message: "User updated successfully", updated });
@@ -57,7 +57,7 @@ exports.updateUser = async (req, res) => {
     }
 };
 
-// Delete a user (മറ്റെന്തിനും മാറ്റമില്ല)
+// 4. Delete a user
 exports.deleteUser = async (req, res) => {
     try {
         const deleted = await User.findByIdAndDelete(req.params.id);
@@ -68,12 +68,10 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
-//5. Get Dashboard Stats (മറ്റെന്തിനും മാറ്റമില്ല)
+// 5. Get Dashboard Stats
 exports.getStats = async (req, res) => {
     try {
-
         const today = new Date();
-
         const [empCount, compCount, userCount, empExpCount, compExpCount] = await Promise.all([
             Employee.countDocuments(),
             Company.countDocuments(),
