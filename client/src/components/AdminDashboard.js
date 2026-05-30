@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../api'; 
 import Layout from './Layout';
 import Dashboard from './Dashboard'; 
+import ServiceGrid from './ServiceGrid';
+
 
 function AdminDashboard({ onLogout }) {
   const [expiryList, setExpiryList] = useState([]);
@@ -36,6 +38,11 @@ function AdminDashboard({ onLogout }) {
   return (
     <Layout onLogout={onLogout}>
       <Dashboard /> 
+
+      <div>
+        <ServiceGrid/>
+      </div>
+
 
       <div className="card mt-4 shadow-sm">
         <div className="card-body">

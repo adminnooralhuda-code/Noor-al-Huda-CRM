@@ -16,6 +16,11 @@ import ExpiryDashboard from './components/ExpiryDashboard';
 import UserManagement from './components/UserManagement';
 import CustomerManagement from './components/CustomerManagement';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import SalaryCertificate from './components/services/SalaryCertificate';
+import { Buffer } from 'buffer'; // ഇത് ഇൻസ്റ്റാൾ ചെയ്ത ശേഷം ഇംപോർട്ട് ചെയ്യുക
+
+// വിൻഡോ ഒബ്‌ജക്റ്റിലേക്ക് ബഫർ ആഡ് ചെയ്യുന്നു
+window.Buffer = Buffer;
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
@@ -64,9 +69,13 @@ function App() {
           <Route path="/view-employee/:id" element={<ProtectedRoute><ViewEmployee /></ProtectedRoute>} />
           <Route path="/update-employee/:id" element={<ProtectedRoute roleRequired="admin"><UpdateEmployee /></ProtectedRoute>} />
 
+          <Route path="/salary-certificate" element={<ProtectedRoute roleRequired="admin"><SalaryCertificate /></ProtectedRoute>} />
+
           {/* Customer Route */}
           <Route path="/customer-dashboard" element={<ProtectedRoute roleRequired="customer"><CustomerDashboard onLogout={handleLogout} /></ProtectedRoute>} />
           
+
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

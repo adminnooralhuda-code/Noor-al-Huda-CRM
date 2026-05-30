@@ -1,18 +1,64 @@
+/* Layout.css - Professional Navy/Slate Theme */
+.layout-container { display: flex; min-height: 100vh; background: #f8fafc; }
+
+.sidebar { 
+    width: 260px; 
+    /* Deep Navy Blue Gradient */
+    background: linear-gradient(180deg, #1e293b 0%, #334155 100%); 
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh; 
+    position: sticky; 
+    top: 0; 
+    color: #e2e8f0;
+    transition: all 0.3s;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
 .logo-container {
     background-color: white; 
-    width: 120px;            
-    height: 120px;           
-    border-radius: 50%;      
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0 auto 20px auto; 
-    padding: 10px;           
+    width: 90px; height: 90px; 
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center; 
+    margin: 30px auto; 
+    border: 4px solid #f8fafc; /* ലോഗോ ബോർഡർ ലളിതമാക്കി */
 }
 
-.logo-img {
-    width: 90%;              
-    height: auto;
-    object-fit: contain;     /* ലോഗോ സർക്കിളിനുള്ളിൽ കട്ട് ആവാതിരിക്കാൻ */
+.logo-img { width: 60px; border-radius: 50%; }
+
+.menu-list { list-style: none; padding: 10px 15px; flex-grow: 1; margin: 0; }
+
+.menu-item { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 5px 0; }
+
+.menu-link { 
+    display: block; padding: 14px 15px; 
+    color: #cbd5e1; /* ശാന്തമായ നിറം */
+    text-decoration: none; font-weight: 500; 
+    border-radius: 6px;
+    transition: 0.2s;
 }
 
+.menu-link:hover { 
+    background: #475569; 
+    color: #ffffff;
+}
+
+.logout-btn { 
+    cursor: pointer; color: #fff; font-weight: 600; 
+    padding: 12px; margin: 20px;
+    text-align: center; 
+    background: #e11d48; /* ഒരു ചെറിയ റെഡ് ടച്ച് - ലോഗൗട്ട് ആയതുകൊണ്ട് */
+    border-radius: 8px; 
+    transition: 0.3s;
+}
+
+.logout-btn:hover { background: #be123c; }
+
+.main-content { flex: 1; padding: 30px; }
+
+/* Responsive Media Queries */
+@media (max-width: 768px) {
+    .layout-container { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .main-content { padding: 15px; }
+}

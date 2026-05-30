@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api'; // axios-ന് പകരം നമ്മുടെ api instance ഉപയോഗിക്കുക
+import api from '../api';
 import Layout from './Layout';
 import { Modal, Button, Form } from 'react-bootstrap';
 
@@ -8,13 +8,12 @@ function UserManagement({ onLogout }) {
   const [companies, setCompanies] = useState([]);
   const [show, setShow] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [formData, setFormData] = useState({ email: '', password: '', role: 'customer', company: '' });
+  const [formData, setFormData] = useState({ username: '', email: '', password: '', role: 'customer', company: '' });
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  // ഒരേ സമയം ഡാറ്റ ഫെച്ച് ചെയ്യാൻ
   const fetchData = async () => {
     try {
       const [usersRes, companiesRes] = await Promise.all([
@@ -24,30 +23,34 @@ function UserManagement({ onLogout }) {
       setUsers(usersRes.data);
       setCompanies(companiesRes.data);
     } catch (err) {
-      console.error("Error fetching data:", err);
       if (err.response?.status === 401) onLogout();
     }
   };
 
   const handleSubmit = async () => {
     try {
-      const dataToSend = {
-        role: formData.role,
-        company: formData.role === 'customer' && formData.company !== "" ? formData.company : null
+      const payload = { 
+        username: formData.username, 
+        email: formData.email,
+        role: formData.role, 
+        company: formData.role === 'customer' ? formData.company : null 
       };
 
       if (editingUser) {
-        await api.put(`/users/${editingUser._id}`, dataToSend);
+        // Edit ചെയ്യുമ്പോൾ:
+        await api.put(`/users/${editingUser._id}`, payload);
         alert("User updated successfully");
       } else {
-        const newUserData = { ...formData, company: dataToSend.company };
-        await api.post('/users/add', newUserData);
+        // Add ചെയ്യുമ്പോൾ:
+        await api.post('/users/add', { ...payload, password: formData.password });
         alert("User added successfully");
       }
+
+      // പ്രധാനപ്പെട്ട മാറ്റം ഇവിടെയാണ്:
       closeModal();
-      fetchData();
+      await fetchData(); // ഡാറ്റാബേസിൽ നിന്ന് പുതിയ ലിസ്റ്റ് വീണ്ടും എടുക്കുന്നു
     } catch (err) {
-      alert(err.response?.data?.message || "Error processing request");
+      alert(err.response?.data?.message || "Error saving user");
     }
   };
 
@@ -58,7 +61,6 @@ function UserManagement({ onLogout }) {
         fetchData();
       } catch (err) {
         console.error(err);
-        if (err.response?.status === 401) onLogout();
       }
     }
   };
@@ -66,6 +68,7 @@ function UserManagement({ onLogout }) {
   const openEditModal = (user) => {
     setEditingUser(user);
     setFormData({ 
+      username: user.username || '', 
       email: user.email, 
       role: user.role, 
       company: user.company?._id || '' 
@@ -76,7 +79,7 @@ function UserManagement({ onLogout }) {
   const closeModal = () => {
     setShow(false);
     setEditingUser(null);
-    setFormData({ email: '', password: '', role: 'customer', company: '' });
+    setFormData({ username: '', email: '', password: '', role: 'customer', company: '' });
   };
 
   return (
@@ -88,11 +91,12 @@ function UserManagement({ onLogout }) {
 
       <table className="table mt-3">
         <thead className="table-dark">
-          <tr><th>Email</th><th>Role</th><th>Company</th><th>Action</th></tr>
+          <tr><th>Username</th><th>Email</th><th>Role</th><th>Company</th><th>Action</th></tr>
         </thead>
         <tbody>
           {users.map(user => (
             <tr key={user._id}>
+              <td>{user.username || "N/A"}</td>
               <td>{user.email}</td>
               <td>{user.role}</td>
               <td>{user.company?.companyNameEn || "N/A"}</td>
@@ -106,11 +110,13 @@ function UserManagement({ onLogout }) {
       </table>
 
       <Modal show={show} onHide={closeModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>{editingUser ? "Edit User" : "Add New User"}</Modal.Title>
-        </Modal.Header>
+        <Modal.Header closeButton><Modal.Title>{editingUser ? "Edit User" : "Add New User"}</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Username</Form.Label>
+              <Form.Control type="text" value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value})} />
+            </Form.Group>
             {!editingUser && (
               <>
                 <Form.Group className="mb-3">

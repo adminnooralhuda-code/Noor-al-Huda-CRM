@@ -22,7 +22,7 @@ function Login({ setIsLoggedIn }) {
             if (id) localStorage.setItem('customerId', id);
             setIsLoggedIn(true);
             const from = location.state?.from?.pathname || 
-                         (role === 'admin' ? '/admin-dashboard' : role === 'staff' ? '/staff-dashboard' : '/customer-dashboard');
+                       (role === 'admin' ? '/admin-dashboard' : role === 'staff' ? '/staff-dashboard' : '/customer-dashboard');
             navigate(from, { replace: true });
         } catch (error) {
             alert('Login failed: ' + (error.response?.data?.message || 'Error occurred.'));
@@ -31,65 +31,18 @@ function Login({ setIsLoggedIn }) {
         }
     };
 
-    const styles = {
-        page: {
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: `linear-gradient(135deg, #9fccfa, #0974f1), url(${loginBg})`,
-            backgroundBlendMode: 'overlay',
-            backgroundSize: 'cover',
-            padding: '20px'
-        },
-        container: {
-            display: 'flex',
-            maxWidth: '900px',
-            width: '100%',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            borderRadius: '30px',
-            overflow: 'hidden',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
-        },
-        leftSide: {
-            flex: 1,
-            padding: '60px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            color: '#0974f1'
-        },
-        rightSide: {
-            width: '400px',
-            padding: '60px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            backgroundColor: '#ffffff'
-        },
-        input: {
-            width: '100%', padding: '15px', margin: '10px 0', border: '1px solid #ddd',
-            borderRadius: '15px', fontSize: '1rem'
-        },
-        button: {
-            width: '100%', padding: '15px', marginTop: '20px',
-            background: '#0974f1', color: '#fff', border: 'none',
-            borderRadius: '15px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem'
-        }
-    };
-
     return (
         <div style={styles.page}>
             <div style={styles.container}>
-                {/* Left Side: Info */}
+                {/* Left Side */}
                 <div style={styles.leftSide}>
                     <img src={logo} alt="Logo" style={{ width: '120px', marginBottom: '20px' }} />
-                    <h1 style={{ fontSize: '2.8rem', margin: '0' }}>Noor al Huda</h1>
-                    <h2 style={{ fontSize: '1.4rem', color: '#555', margin: '10px 0' }}>Typing and Photocopying Services</h2>
-                    <p style={{ fontSize: '1.1rem', opacity: 0.8 }}>Advanced Management System</p>
+                    <h1 style={{ fontSize: '2.5rem', margin: '0' }}>Noor al Huda</h1>
+                    <h2 style={{ fontSize: '1.2rem', color: '#555', margin: '10px 0' }}>Typing and Photocopying Services</h2>
+                    <p style={{ fontSize: '1rem', opacity: 0.8 }}>Advanced Management System</p>
                 </div>
 
-                {/* Right Side: Login Form */}
+                {/* Right Side */}
                 <div style={styles.rightSide}>
                     <h2 style={{ marginBottom: '20px' }}>Sign In</h2>
                     <form onSubmit={handleLogin}>
@@ -104,5 +57,54 @@ function Login({ setIsLoggedIn }) {
         </div>
     );
 }
+
+// Responsive Styles (മൊബൈലിലും ലാപ്ടോപ്പിലും ഒരേപോലെ വർക്ക് ചെയ്യാൻ)
+const styles = {
+    page: {
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: `linear-gradient(135deg, #9fccfa, #0974f1), url(${loginBg})`,
+        backgroundBlendMode: 'overlay',
+        backgroundSize: 'cover',
+        padding: '20px'
+    },
+    container: {
+        display: 'flex',
+        maxWidth: '900px',
+        width: '100%',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: '30px',
+        overflow: 'hidden',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+        flexDirection: window.innerWidth < 768 ? 'column' : 'row' // Responsive fix
+    },
+    leftSide: {
+        flex: 1,
+        padding: '60px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        color: '#0974f1'
+    },
+    rightSide: {
+        width: window.innerWidth < 768 ? '100%' : '400px',
+        padding: '60px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        backgroundColor: '#ffffff'
+    },
+    input: {
+        width: '100%', padding: '15px', margin: '10px 0', border: '1px solid #ddd',
+        borderRadius: '15px', fontSize: '1rem', boxSizing: 'border-box'
+    },
+    button: {
+        width: '100%', padding: '15px', marginTop: '20px',
+        background: '#0974f1', color: '#fff', border: 'none',
+        borderRadius: '15px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem'
+    }
+};
 
 export default Login;
